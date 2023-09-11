@@ -1,0 +1,91 @@
+<head>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <script>
+    function handleDrafted(player) {
+        var element = document.getElementById(player);
+        var row = element.closest('tr');
+        if (element.checked) {
+            row.style.display = "none"; // Remove the row from the DOM
+            localStorage.setItem(player, "highlighted");
+        } 
+        else {
+            row.style.backgroundColor = "";
+            localStorage.removeItem(player);
+        }
+    }
+    window.addEventListener('load', function() {
+        var checkboxes = document.querySelectorAll('input[type="checkbox"]');
+        checkboxes.forEach(function(checkbox) {
+            var player = checkbox.id;
+            var row = checkbox.closest('tr');
+            if (localStorage.getItem(player) === "highlighted") {
+                checkbox.checked = true;
+                // row.style.backgroundColor = "yellow";
+            }
+        });
+    });
+
+    function resetCheckboxes() {
+        var checkboxes = document.querySelectorAll('input[type="checkbox"]');
+        checkboxes.forEach(function(checkbox) {
+            checkbox.checked = false;
+            var player = checkbox.id;
+            var row = checkbox.closest('tr');
+            row.style.backgroundColor = "";
+            localStorage.removeItem(player);
+        });
+
+        var originalPlayers = document.querySelectorAll('.original-player');
+        originalPlayers.forEach(function(player) {
+        player.style.display = "table-row";
+    });
+    }
+    
+    
+    </script>
+</head>
+<body>
+    <form method="POST" id = "myForm">
+        <select name="position">
+            <option value="ALL" {% if position == 'ALL' %}selected{% endif %}>All</option>
+            <option value="QB" {% if position == 'QB' %}selected{% endif %}>Quarterback</option>
+            <option value="RB" {% if position == 'RB' %}selected{% endif %}>Running Back</option>
+            <option value="WR" {% if position == 'WR' %}selected{% endif %}>Wide Receiver</option>
+            <option value="TE" {% if position == 'TE' %}selected{% endif %}>Tight End</option>
+            <option value="FLEX" {% if position == 'FLEX' %}selected{% endif %}>FLEX</option>
+        </select>
+        <input type="submit" value="Filter">
+        <button type="button" onclick="resetCheckboxes()">Clear Drafted</button>
+    </form>
+
+    <table>
+        <tr>
+            <th>Drafted</th>
+            <th>Average Rank</th>
+            <th>Player</th>
+            <th>Position</th>
+            <th>Team</th>
+            <th>Rank_ESPN</th>
+            <th>Rank_CBS</th>
+            <th>Rank_NBC</th>
+            <!-- Add more headers as needed -->
+        </tr>
+        {% for row in data %}
+
+        <tr>
+            <td>
+                <input type="checkbox" id="{{ row.Player }}" name="drafted" value="{{ row.Player }}" onclick="handleDrafted('{{ row.Player }}')">
+                <label for="{{ row.Player }}"></label>
+            </td>
+            <td>{{ row['Average_Rank'] }}</td>
+            <td>{{ row['Player'] }}</td>
+            <td>{{ row['Position'] }}</td>
+            <td>{{ row['Team'] }}</td>
+            <td>{{ row['Rank_ESPN'] }}</td>
+            <td>{{ row['Rank_CBS'] }}</td>
+            <td>{{ row['Rank_NBC'] }}</td>
+            <!-- Add more data cells as needed -->
+        </tr>
+        {% endfor %}
+    </table>
+</body>
